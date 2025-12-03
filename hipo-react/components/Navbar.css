@@ -1,0 +1,40 @@
+.navbar-pages-estilo {
+  padding: 5px !important;
+}
+
+.navbar-pages {
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  background: rgb(251, 251, 251);
+  background: linear-gradient(90deg, #fbfbfb 1%, #248589 40%, #f16536 55%);
+}
+
+.navbar-pages .navbar-nav .nav-link:hover {
+  color: #dddddd;
+}
+
+.navbar-pages .navbar-brand img {
+  height: 50px;
+}
+
+.navbar-pages .offcanvas {
+  background-color: rgba(36, 133, 137, 0.95);
+}
+
+.navbar-pages .dropdown-menu {
+  background-color: #242628;
+}
+
+.navbar-pages .dropdown-item {
+  color: white;
+}
+
+.navbar-pages .dropdown-item:hover {
+  background-color: #444;
+}
+
+.navbar-toggler {
+  margin-top: 5px;
+}

@@ -1,0 +1,456 @@
+body {
+    background-color: #f0f3f5 !important;
+}
+
+/**INICIO HEADER**/
+
+#header-inicio {
+    height: 450px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 90px;
+    border-radius: 0 0 85% 85% / 25%;
+}
+
+
+.video-fondo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 450px;
+  z-index: -2;
+
+  object-fit: cover;       /* Hace que se vea como background-size: cover */
+  object-position: center; /* Centrado, como background-position: center */
+  border-radius: 0 0 85% 85% / 25%;
+}
+
+.capa {
+  position: absolute;
+  width: 100%;
+  height: 450px;
+  background-color: rgba(0, 0, 0);
+  opacity: 0.5;
+  z-index: -1;
+  border-radius: 0 0 85% 85% / 25%;
+}
+
+
+/**NAVEGACION**/
+
+.logo-hipo-inicio {
+    width: 50px;
+    margin: 0;
+    display: none;
+}
+
+.logo-visible {
+    display: block;
+    width: 110px;
+}
+
+.navbar {
+    padding: 5px 0px !important;
+    position: absolute !important;
+    z-index: 1;
+}
+
+.offcanvas {
+    width: 320px !important;
+}
+
+.offcanvas-title {
+    color: #e07e5e;
+    font-family: var(--parrafos);
+    font-weight: bold;
+}
+
+.navbar-nav {
+    gap: 10px;
+}
+
+.navbar-nav .nav-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.151);
+}
+
+.navbar-toggler {
+    background-color: rgba(92, 90, 90, 0.5) !important;
+}
+
+/* CSS para mostrar dropdowns en hover */
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+/**FIN NAVEGACION**/
+
+.contenedor-centro-video {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;    
+    opacity: 1;
+}
+
+.separador-centro {
+    width: 20%;
+    margin: 10px auto 30px;
+    background-color: rgba(255, 255, 255, 0.3);
+    padding: 1px;
+}
+
+.contenido-centro {
+    margin: 10px auto;
+    opacity: 0.9;
+    font-size: 14px;
+    font-family: var(--titulo);
+}
+
+.redes-inicio {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.redes-inicio a {
+  text-decoration: none;
+}
+
+.redes-inicio i {
+  font-size: 22px;
+  color: white;
+  cursor: pointer;
+  width: 45px;         /* ancho fijo */
+  height: 45px;        /* alto fijo */
+  display: flex;       /* centra el icono */
+  justify-content: center;
+  align-items: center;
+
+  background-color: rgba(128, 128, 128, 0.4);
+  border-radius: 50%;  /* círculo perfecto */
+  transition: all 0.3s ease;
+}
+
+.redes-inicio a:nth-child(1):hover i {
+  background-color: #1877F2;
+  box-shadow: 0 0 12px #1877F2;
+  transform: scale(1.15);
+}
+
+.redes-inicio a:nth-child(2):hover i {
+  background-color: #25D366;
+  box-shadow: 0 0 12px #25D366;
+  transform: scale(1.15);
+}
+
+.redes-inicio a:nth-child(3):hover i {
+  background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4);
+  box-shadow: 0 0 12px #DD2A7B;
+  transform: scale(1.15);
+}
+
+.redes-inicio a:nth-child(4):hover i {
+  background-color: #FF0000;
+  box-shadow: 0 0 12px #FF0000;
+  transform: scale(1.15);
+}
+
+
+/*BOTON CONTENEDOR CENTRO*/
+
+.contenedorBotonesCentro {
+    display: flex;
+    gap: 15px;
+}
+
+.button {
+    --height: 35px;
+    --tooltip-height: 35px;
+    --tooltip-width: 90px;
+    --gap-between-tooltip-to-button: 18px;
+    --button-color: #1163ff;
+    --tooltip-color: #fff;
+    width: 120px;
+    height: var(--height);
+    background: #e0331e !important;
+    position: relative;
+    text-align: center;
+    border-radius: 0.45em;
+    font-family: "Arial";
+    transition: background 0.3s;
+    font-size: 14px;
+  }
+  
+  .button::before {
+    position: absolute;
+    content: none;
+    width: var(--tooltip-width);
+    height: var(--tooltip-height);
+    background-color: var(--tooltip-color);
+    font-size: 0.9rem;
+    color: #111;
+    border-radius: .25em;
+    line-height: var(--tooltip-height);
+    bottom: calc(var(--height) + var(--gap-between-tooltip-to-button) + 10px);
+    left: calc(50% - var(--tooltip-width) / 2);
+  }
+  
+  .button::after {
+    position: absolute;
+    content: '';
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-top-color: var(--tooltip-color);
+    left: calc(50% - 10px);
+    bottom: calc(100% + var(--gap-between-tooltip-to-button) - 10px);
+  }
+  
+  .button::after,.button::before {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s;
+  }
+  
+  .text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .button-wrapper,.text,.icon {
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    color: #fff;
+  }
+  
+  .text {
+    top: 0
+  }
+  
+  .text,.icon {
+    transition: top 0.5s;
+  }
+  
+  .icon {
+    color: #fff;
+    top: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .button:hover {
+    background: #6c18ff;
+  }
+  
+  .button:hover .text {
+    top: -100%;
+  }
+  
+  .button:hover .icon {
+    top: 0;
+  }
+  
+  .button:hover:before,.button:hover:after {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .button:hover:after {
+    bottom: calc(var(--height) + var(--gap-between-tooltip-to-button) - 20px);
+  }
+  
+  .button:hover:before {
+    bottom: calc(var(--height) + var(--gap-between-tooltip-to-button));
+  }
+
+  .iconoBotonCentro {
+    display: none;
+}
+
+@media screen and (min-width: 768px) {
+    #header-inicio {
+        height: 90vh;
+        gap: 120px;
+    }
+    
+    .capa {
+        height: 90vh;
+    }
+
+    .video-fondo {
+      height: 90vh;
+    }  
+
+    .titulo-centro {
+        font-size: 40px
+    }
+
+    .navbar {
+        padding: 20px !important;
+    }
+
+    .navbar-nav {
+        gap: 15px;
+    }
+    
+    .navbar-nav .nav-item {
+        border: none;
+    }
+    
+    .nav-link {
+        color: white !important;
+        font-weight: bold !important;
+        font-size: 17px !important;
+    }
+
+    .nav-link:hover {
+        opacity: 0.5;
+        transition: 3ms ease;
+    }
+    
+    .not-bold {
+        font-weight: normal !important;
+    }
+
+    .redes-inicio {
+        gap: 40px;
+    }
+
+    .logo-none {
+        display: none;
+    }
+
+    .logo-visible {
+        display: block;
+        width: 150px;
+        margin-bottom: 30px;
+    }
+    .titulo-centro {
+        display: none;
+    }
+
+    .dropdown-item:hover {
+        background-color: #0d6efd !important;
+    }
+
+    .contenedorBotonesCentro {
+        display: flex;
+        gap: 60px;
+    }
+
+    .contenedorSecundario {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        padding: 0 30px;
+    }
+
+    .calendar {
+        width: 95% !important;
+    }
+
+    .contenedorCalendario {
+        width: 100%;
+    }
+
+    .contenedorHipica {
+        width: 100%;
+    }
+
+    .contenedor-botones-inicio {
+        display: flex;
+        flex-direction: column;
+        height: 70%;
+    }
+
+    .carousel-item img {
+        width: 100% !important;
+        height: 80vh;
+    }
+
+    .titulo-hipica {
+        margin-top: 10px !important;
+    }
+
+    .titulo-center {
+        text-align: center;
+    }
+
+    .button {
+        width: 150px;
+    }
+
+    .iconoBotonCentro {
+        margin-right: 7px;
+        display: block;
+    }
+}
+
+.contenedorSecundario {
+    margin-top: 20px;
+}
+
+@media (min-width: 950px) {
+    .contenedorPrincipal {
+        display: grid;
+        grid-template-columns: 2fr 1fr; /* El carrusel ocupará dos veces el espacio de los otros contenedores */
+        gap: 10px; /* Espacio entre los contenedores */
+        min-height: 80vh; /* Altura total de la pantalla */
+        box-sizing: border-box;
+        padding: 20px;
+        position: relative;
+    }
+
+    .contenedorSecundario {
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 0;
+        padding: 0;
+    }
+
+    .titulo-hipica {
+        margin-top: 0 !important;
+    }
+
+    .titulo-margin {
+        margin-top: 50px !important;
+    }
+
+    .boton-hipica {
+        width: 70% !important;
+    }
+
+    .contenedor-botones-inicio {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .separator {
+        position: absolute;
+        left: 65.4%;
+        transform: translateX(-50%);
+        width: 4px;
+        background: linear-gradient(to bottom, rgb(36, 133, 137), rgb(241, 101, 54));
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        height: 100%;
+        border-radius: 10px; /* Bordes redondeados */
+        opacity: 0.6;
+    }
+}
+
+/**FIN HEADER**/

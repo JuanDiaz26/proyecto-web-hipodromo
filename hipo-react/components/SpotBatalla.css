@@ -1,0 +1,127 @@
+/* 100% de alto de viewport (con fallbacks para móviles) */
+.spot-batalla-section {
+  position: relative;
+  background: url("/batalla-fondo.webp") center / cover no-repeat;
+  overflow: hidden;
+  min-height: 100svh;   /* moderno */
+  min-height: 100vh;    /* fallback */
+  display: flex;
+  align-items: center;  /* centra verticalmente el contenido */
+}
+
+/* Overlay en gradiente + tinte para bajar la intensidad */
+.spot-bg-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(36, 134, 137, 0.65) 0%,
+    rgba(241, 101, 54, 0.65) 100%
+  );
+} 
+.spot-bg-tint {
+  background: rgba(0, 0, 0, 0.436); /* subí/bajá este valor para más/menos opacidad */
+}
+
+/* Pill superior (kicker) */
+.spot-kicker{
+  display:inline-block;
+  font-size:.8rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  font-weight:700;
+  color:#fff;
+  padding:.35rem .75rem;
+  border-radius:9999px;
+  border:1px solid rgba(255,255,255,.28);
+  background: rgba(0,0,0,.22);
+  backdrop-filter: blur(6px);
+}
+
+/* Título principal */
+.spot-title{
+  margin:.5rem 0 .25rem;
+  font-weight:800;
+  line-height:1.05;
+  font-size:clamp(1.9rem, 4.2vw, 3.2rem);
+  color:#fff;
+  text-shadow:0 2px 16px rgba(0,0,0,.25);
+}
+
+/* Barra decorativa en gradiente (colores de marca) */
+.spot-underline{
+  width:min(260px, 45%);
+  height:4px;
+  border-radius:999px;
+  margin:.4rem 0 0;
+  background:linear-gradient(90deg,#248689, #f16536);
+}
+
+/* Subtítulo/fecha en chip estilo glass */
+.spot-subtitle{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  font-weight:600;
+  color:rgba(255,255,255,.95);
+  padding:.4rem .8rem;
+  border-radius:.8rem;
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(0,0,0,.18);
+  backdrop-filter: blur(6px);
+}
+.spot-subtitle .bi{ opacity:.9; }
+
+/* En desktop alineamos a la izquierda (coherente con el split) */
+@media (min-width: 992px){
+  .spot-heading{text-align:left;}
+}
+
+/* Texto derecha más contenido */
+.spot-info .spot-copy {
+  max-width: 560px;
+}
+
+/* Video izquierda */
+.spot-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.22);
+  cursor: pointer;
+}
+.spot-sound-toggle {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  backdrop-filter: blur(4px);
+}
+
+/* 🔸 Ambos botones con el mismo estilo (outline blanco + base naranja translúcida) */
+.btn-spot-outline {
+  color: #ffffff !important;
+  font-weight: bold !important;
+  background-color: #f16536df !important; /* base suave naranja */
+  border: 2px solid rgba(255,255,255,0.9) !important;
+  border-radius: 12px !important;
+}
+.btn-spot-outline:hover,
+.btn-spot-outline:focus {
+  background-color: #ffffff !important;
+  color: #248689 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 0.25rem rgba(255,255,255,0.45);
+}
+
+/* Mobile tweaks */
+@media (max-width: 768px) {
+  .spot-batalla-section { padding: 2rem 0 !important; }
+  .spot-info .spot-copy { margin-left: auto; margin-right: auto; }
+}
+
+.text-white {
+    font-weight: bold;
+    font-size: 20px !important;
+}

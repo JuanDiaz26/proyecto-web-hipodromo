@@ -1,0 +1,520 @@
+/* MAIN */
+.main-inicio {
+    width: 93%;
+    margin: 10px auto;
+    box-shadow: 0px 0px 5px 1px rgba(0,0,0,0.20);
+    background-color: white;
+}
+
+@media screen and (min-width: 768px) {
+    .main-inicio {
+        margin-top: 40px; /* Antes estaba en .main-pages, ahora en .main-inicio */
+    }
+}
+
+/* WHATSAPP ICON */
+.whatsapp-icon {
+    background-color: #0df053;
+    position: fixed;
+    bottom: 20px;
+    right: 10px;
+    width: 55px;
+    height: 55px;
+    cursor: pointer;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    color: white;
+}
+
+.whatsapp-icon.visible {
+    opacity: 1;
+}
+
+.whatsapp-icon:hover {
+    background-color: white;
+    color: #0df053;
+    transition: 0.3s ease;
+    box-shadow: 0px 0px 5px 1px rgba(0,0,0,0.35);
+}
+
+/* SCROLL NOVEDAD */
+.container-scroll-novedad {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  background-color: #20afb4;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.novedades {
+  white-space: nowrap;
+  animation: scrollLeft 12s linear infinite;
+}
+
+/* Cada item como fila con separación */
+.novedad {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;               /* <<< espacio entre la fecha y el botón PDF */
+  padding: 10px;
+  margin-right: 300px;
+}
+
+@keyframes scrollLeft {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-250%); }
+}
+
+@media screen and (min-width: 768px) {
+  .novedades { animation: scrollLeft 15s linear infinite; }
+  @keyframes scrollLeft {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+}
+
+.enlace-novedad-scroll {
+  text-decoration: none;
+  color: #fff;
+  font-size: 17px;
+}
+
+.enlace-novedad-scroll strong {
+  margin-right: 6px;
+}
+
+/* Botón PDF con “pill” y buen hit-area */
+.pdf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;                /* espacio entre texto e icono */
+  text-decoration: none;
+  color: #000000;
+  font-size: 17px;
+  padding: 4px 10px;       /* hace click más cómodo */
+  border-radius: 999px;    /* pill */
+  background: rgba(241, 237, 237, 0.87);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.pdf-link .bi {
+  font-size: 18px;
+  color: #ff3b30;/* rojo tipo PDF */
+  line-height: 1;
+}
+
+.pdf-link:hover {
+  background: #f16536;
+  transform: translateY(-1px);
+  color: white;
+}
+
+/* ====== CONTENEDOR 16:9 Y ALTURAS ====== */
+.contenedorCarousel {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 0 0 24px 0;
+  max-height: 520px;
+  min-height: 320px;
+  border-radius: 12px;           /* borde suave */
+  overflow: hidden;              /* oculta flechas/scrims que sobresalgan */
+}
+
+/* Carrusel llena el alto forzado */
+.contenedorCarousel .carousel,
+.contenedorCarousel .carousel-inner,
+.contenedorCarousel .carousel-item { height: 100%; }
+
+/* Fondo por transición + scrim para contraste de textos/CTA */
+.contenedorCarousel .carousel-item {
+  position: relative;            /* necesario para overlays */
+  background: linear-gradient(135deg, #248689 0%, #f16536 100%);
+  overflow: hidden;
+}
+.contenedorCarousel .carousel-item::before {
+  /* scrim sutil para que la placa no “chille” y el CTA se lea bien */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.18) 100%);
+  pointer-events: none;
+}
+
+/* Placa cubre sin deformarse */
+.contenedorCarousel .carousel-item img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+    /* un pelín de nitidez al reescalar */
+  image-rendering: auto;
+}
+
+/* Desktop más alto (solo max-height) */
+@media (min-width: 1200px) {
+  .contenedorCarousel { max-height: 580px; }
+}
+
+/* MOBILE: menos alto y menos margen */
+@media (max-width: 576px) {
+  .contenedorCarousel {
+    min-height: 240px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+}
+
+/* ====== SOMBRA CAJA GENERAL ====== */
+.carousel {
+  width: 100%;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+/* ====== CONTROLES (FLECHAS) ====== */
+.carousel-control-prev,
+.carousel-control-next {
+  width: 12%; /* área de click generosa */
+}
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.45);
+  border-radius: 50%;
+  padding: 12px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.carousel-control-prev:hover .carousel-control-prev-icon,
+.carousel-control-next:hover .carousel-control-next-icon {
+  transform: scale(1.05);
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.carousel-control-prev:focus .carousel-control-prev-icon,
+.carousel-control-next:focus .carousel-control-next-icon {
+  outline: 2px solid #f16536;
+  outline-offset: 2px;
+}
+
+/* ====== CTA SOLO EN SLIDE DE INSCRIPTOS ====== */
+/* Recordá: el contenedor de esa slide tiene class="carousel-item inscriptos-slide" */
+.inscriptos-slide .cta-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+  opacity: 0;                    /* desktop: aparece al hover */
+  transition: opacity 0.25s ease;
+}
+.inscriptos-slide .cta-overlay::before {
+  /* velo para oscurecer un poco la placa cuando aparece el CTA */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.28);
+}
+.inscriptos-slide .cta-overlay::after {
+  /* botón */
+  content: "Ver inscriptos";
+  position: relative;
+  z-index: 1;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #248689 0%, #f16536 100%);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.28);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* Hover en desktop */
+.inscriptos-slide:hover .cta-overlay { opacity: 1; }
+.inscriptos-slide .cta-overlay:hover::after {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+/* Focus accesible (si se navega con teclado) */
+.inscriptos-slide .cta-overlay:focus-visible::after {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+/* Mobile: sin hover, que se vea siempre */
+@media (max-width: 768px) {
+  .inscriptos-slide .cta-overlay { opacity: 1; }
+  .inscriptos-slide .cta-overlay::after { padding: 10px 16px; font-size: 0.95rem; }
+}
+
+/* ====== ANIMACIÓN/REDUCED MOTION ====== */
+@media (prefers-reduced-motion: reduce) {
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon,
+  .inscriptos-slide .cta-overlay,
+  .inscriptos-slide .cta-overlay::after {
+    transition: none;
+  }
+}
+
+/* Ocultar el texto real del <a> para que no se vea detrás */
+.inscriptos-slide .cta-overlay {
+  color: transparent;      /* oculta color del texto (incluye visited/active) */
+  font-size: 0;            /* evita que ocupe alto por tipografía */
+  line-height: 0;          /* por si algún navegador mantiene línea */
+}
+
+.inscriptos-slide .cta-overlay::after {
+  font-size: 2rem;          /* recupera tamaño del texto */
+  display: inline-block;    /* asegura el box correcto */
+  padding: 35px 25px;       /* mantené el mismo padding */
+}
+
+.contenedor-botones-inicio { 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.cardHipica {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-left: 4px solid rgb(36, 133, 137);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 15px;
+    width: 90%;
+    text-decoration: none;
+}
+
+.cardHipica:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+}
+
+.cardHipica-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.cardHipica-date {
+    color: grey;
+    font-size: 0.8em;
+    margin-bottom: 10px;
+}
+
+.cardHipica h3 {
+    margin: 0;
+    font-size: 1.3em;
+    color:#f16536;
+
+}
+
+/* CALENDARIO */
+.calendar {
+    width: 90%;
+    margin: 0px auto;  
+    box-shadow: 0px 0px 5px 1px rgba(0,0,0,0.35);
+}
+
+.days, .week-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    padding: 5px;
+}
+
+
+.header-calendario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+    text-align: center;
+    gap: 5px;
+    border-bottom: 1px solid #0e4b22;
+    padding: 5px;
+    background-color: #e7e6e6ee;
+}
+
+#month-year {
+    margin: 0;
+    font-size: 20px;
+}
+
+.week-days {
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f16536;
+    color: white;
+    width: 99%;
+    margin: auto;
+}
+
+.day {
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    position: relative;
+}
+
+.day a {
+    color: #fff;
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    text-decoration: none;
+    color: inherit;
+    margin-top: 5px;
+}
+
+.carrera {
+    text-decoration: none;
+    color: #fff;
+    background-color: #248589;
+    padding: 6px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    opacity: 1;
+}
+
+.carrera:hover {
+    opacity: 0.6;
+}
+
+.prev, .next {
+    background-color: #f16536;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+}
+
+.contenedorPrincipal {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 30px;
+}
+
+@media (min-width: 992px) {
+  .contenedorPrincipal {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .columnaIzquierda {
+    width: 65%;
+  }
+
+  .columnaDerecha {
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .calendar {
+    width: 100%;
+  }
+
+  .contenedorHipica {
+    width: 100%;
+  }
+}
+
+/* Ajusta altura alineada entre carrusel y columna derecha */
+@media (min-width: 992px) {
+  .contenedorPrincipal {
+    align-items: stretch;
+  }
+
+  .columnaIzquierda, .columnaDerecha {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contenedorCarousel {
+    flex-grow: 1;
+    margin-top: 30px;
+  }
+
+  .columnaDerecha {
+    justify-content: space-between;
+  }
+}
+
+/* Ajustar altura visual del calendario */
+.calendar .week-days div,
+.calendar .day {
+  padding: 8px 4px;
+  font-size: 14px;
+}
+
+/* Menos espacio entre tarjetas de Hipica */
+.contenedor-botones-inicio {
+  gap: 10px;
+}
+
+
+/* Reemplaza/añade */
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  width: 90%;
+  margin: 20px auto;
+  padding: 20px 10px 10px;
+  text-align: left;
+  line-height: 1.15;           /* evita que el texto se “despegue” */
+}
+
+.titulo-seccion .punto-color-titulo {
+  display: block;              /* saca el baseline raro del inline-svg */
+  flex-shrink: 0;              /* que el puntito no se achique */
+}
+
+/* Columna derecha: márgenes mínimos */
+.titulo-derecha {
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+  margin: 10px 0 0 !important;
+}
+
+/* En móvil: tamaño un toque menor + márgenes más chicos */
+@media (max-width: 576px) {
+  .titulo-seccion {
+    width: 100% !important;
+    font-size: 24px !important;
+    margin: 12px auto 0;
+    padding: 8px 4px 0;
+  }
+}
+

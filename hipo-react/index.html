@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Preload de la imagen LCP -->
+    <link rel="preload" as="image" href="/fondonew.webp">
+
+    <!-- Preconnect: orígenes críticos (sin Google Fonts) -->
+    <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://i.ytimg.com">
+    <link rel="dns-prefetch" href="https://static.doubleclick.net">
+
+    <title>Inicio | Hipódromo de Tucumán</title>
+    <meta name="description" content="El Hipódromo de Tucumán, orgullo del Norte Argentino, ofrece carreras de caballos, programas, resultados y toda la información oficial. Administrado por la Caja Popular de Ahorros.">
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://hipodromodetucuman.netlify.app/" />
+
+    <!-- Iconos y PWA básico -->
+    <link rel="icon" href="/logohipocolor.png">
+    <link rel="apple-touch-icon" href="/logohipocolor.png" />
+
+    <!-- Color de la UI del navegador -->
+    <meta name="theme-color" content="#248689" />
+    <meta name="color-scheme" content="light only" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Hipódromo de Tucumán" />
+    <meta property="og:title" content="Hipódromo de Tucumán" />
+    <meta property="og:description" content="Resultados, programas, estadísticas, noticias y toda la información oficial." />
+    <meta property="og:url" content="https://hipodromodetucuman.netlify.app/" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:image" content="https://hipodromodetucuman.netlify.app/og-image.jpg" />
+    <meta property="og:image:secure_url" content="https://hipodromodetucuman.netlify.app/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:alt" content="Hipódromo de Tucumán - Sitio oficial" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Hipódromo de Tucumán" />
+    <meta name="twitter:description" content="Resultados, programas, estadísticas, noticias y más." />
+    <meta name="twitter:image" content="https://hipodromodetucuman.netlify.app/og-image.jpg" />
+    <meta name="twitter:domain" content="hipodromodetucuman.netlify.app" />
+
+    <!-- Preload: imagen LCP si aplica -->
+    <link rel="preload" as="image" href="/carousel-ricardo.webp">
+
+    <!-- CSS crítico MUY breve para evitar FOUC (sin fuentes externas) -->
+    <style>
+      html { scroll-behavior: smooth }
+      body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif }
+      header, nav { display: flex; align-items: center }
+      .hero { min-height: 60vh; display: grid; place-items: center }
+    </style>
+
+    <!-- CARGA NO BLOQUEANTE del CSS principal -->
+    <link rel="stylesheet" href="/src/index.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/src/index.css"></noscript>
+
+    <!-- Datos estructurados -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Hipódromo de Tucumán",
+      "url": "https://hipodromodetucuman.netlify.app/",
+      "logo": "https://hipodromodetucuman.netlify.app/logohipocolor.png",
+      "sameAs": [
+        "https://www.facebook.com/hipodromotuc",
+        "https://www.instagram.com/hipodromodetucuman/",
+        "https://www.youtube.com/@HipodromodeTucuman"
+      ]
+    }
+    </script>
+  </head>
+
+  <body>
+    <noscript>Para usar este sitio necesitás habilitar JavaScript.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

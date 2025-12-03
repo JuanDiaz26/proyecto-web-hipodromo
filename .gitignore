@@ -1,0 +1,15 @@
+# Ignorar dependencias de Node (por si acaso instalas algo en la raíz)
+node_modules/
+dist/
+
+# Ignorar cosas de Python (Backend y scripts)
+__pycache__/
+*.py[cod]
+venv/
+env/
+.venv/
+.pytest_cache/
+
+# Archivos de sistema y logs
+.DS_Store
+*.log

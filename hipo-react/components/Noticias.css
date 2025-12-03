@@ -1,0 +1,178 @@
+/* ====== contenedor general ====== */
+.main-noticias {
+  width: 93%;
+  margin: 10px auto;
+  box-shadow: 0 0 5px 1px rgba(0,0,0,.20);
+  background: #fff;
+  padding: 10px 0 20px;
+  border-radius: 4px;
+}
+
+/* ====== grilla de noticias (responsive) ====== */
+.contenedor-noticias {
+  width: 95%;
+  margin: 0 auto 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;                   /* + aire entre cards */
+  justify-items: center;       /* centra el contenido de cada celda */
+  align-items: stretch;
+  padding: 0 8px;              /* margen interior para que no pegue en el borde */
+}
+
+/* ====== card ====== */
+.card {
+  width: 95%;
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,.08),
+    0 8px 16px rgba(0,0,0,.06);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 6px 14px rgba(0,0,0,.12),
+    0 14px 28px rgba(0,0,0,.10);
+}
+
+/* ====== imagen ====== */
+.card-img-top {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* ====== contenido ====== */
+.card-body-noti {
+  padding: 12px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+/* título (clamp 2) */
+.card-titulo-noti {
+  font-family: var(--titulo);
+  font-size: 20px;
+  line-height: 1.2;
+  margin: 0 0 2px;
+
+  /* Fallback estándar */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  display: -webkit-box; /* para navegadores WebKit */
+
+  /* WebKit-only (encapsulado para que el linter no se queje) */
+}
+@supports (-webkit-line-clamp: 1) {
+  .card-titulo-noti {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 5;
+  }
+}
+
+/* párrafo: 5 líneas en todos los tamaños */
+.card-parrafo-noti {
+  color: grey;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box; /* para navegadores WebKit */
+  margin-bottom: 0;
+}
+
+@supports (-webkit-line-clamp: 1) {
+  .card-parrafo-noti {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 7;
+    line-clamp: 7;
+  }
+}
+
+
+/* ====== pie ====== */
+.card-footer {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ícono youtube */
+.i-youtu {
+  color: red;
+  font-size: 18px;
+  transition: opacity .2s ease;
+  opacity: 1;
+}
+.i-youtu:hover { opacity: .4; }
+
+/* título sección */
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  width: 90%;
+  margin: 20px auto;
+  padding: 20px 10px 10px;
+  text-align: left;
+}
+.punto-color-titulo { color: #248589; }
+
+/* ====== ajustes responsive ====== */
+@media (min-width: 1200px) {
+  .contenedor-noticias {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  /* mantenemos 5 líneas también en desktop grande */
+}
+
+@media (max-width: 576px) {
+  .contenedor-noticias {
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 24px;
+    gap: 24px;
+  }
+
+  .card {
+    width: 100%;
+    margin-bottom: 14px; /* “colchón” extra por si otra regla pisa el gap */
+  }
+
+  .card-img-top { aspect-ratio: 3 / 2; } /* un poco más alta, luce mejor en mobile */
+  .card-titulo-noti { font-size: 18px; }
+  /* el clamp de 5 líneas ya aplica vía @supports arriba */
+}
+
+/* Tablet chica */
+@media (min-width: 577px) and (max-width: 768px) {
+  .contenedor-noticias {
+    padding-left: 22px;
+    padding-right: 22px;
+    gap: 22px;
+  }
+}
+
+/* si hay .row madre, recuperá el gutter en mobile */
+@media (max-width: 576px) {
+  .contenedor-noticias .row {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+  }
+}

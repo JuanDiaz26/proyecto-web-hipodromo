@@ -1,0 +1,152 @@
+/* ====== contenedor general (igual “look” que .main-noticias) ====== */
+.main-estadisticas {
+  width: 93%;
+  margin: 10px auto 20px;
+  box-shadow: 0 0 5px 1px rgba(0,0,0,.20);
+  background: #fff;
+  padding: 10px 0 22px;
+  border-radius: 4px;
+}
+
+/* subtítulo bajo el h2 */
+.intro-estadisticas {
+  width: 90%;
+  margin: 0 auto 14px;
+  color: #6c757d;
+}
+
+/* ====== grilla (parienta de .contenedor-noticias) ====== */
+.contenedor-estadisticas {
+  width: 95%;
+  margin: 0 auto 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
+  justify-items: center;
+  align-items: stretch;
+  padding: 0 8px;
+}
+
+/* ====== tarjeta TOP con fondo de color ====== */
+/* Forzamos a ganarle al .card de Bootstrap */
+.card.card-top,
+.card-top {
+  width: 95%;
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,.08),
+    0 8px 16px rgba(0,0,0,.06);
+  transition: transform .18s ease, box-shadow .18s ease;
+  border: 0 !important;
+  background: transparent !important; /* se pisará por las variantes */
+}
+
+/* Encabezado dentro de la tarjeta (título + badge TOP 3) */
+.encabezado-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:.5rem;
+}
+
+/* ====== VARIANTES DE COLOR (IDENTIDAD HÍPODROMO) ====== */
+/* Paleta:
+   Naranja: #f16536 / #e24c1a
+   Azul verdolado: #248689 / #176d6f
+*/
+
+/* JOCKEYS → gradiente naranja */
+.card.card-top.card-top--jockeys,
+.card-top.card-top--jockeys {
+  background: linear-gradient(180deg, #f16536 0%, #e24c1a 100%) !important;
+  color: #fff !important;
+}
+
+/* ENTRENADORES → gradiente azul verdolado */
+.card.card-top.card-top--entrenadores,
+.card-top.card-top--entrenadores {
+  background: linear-gradient(180deg, #248689 0%, #176d6f 100%) !important;
+  color: #fff !important;
+}
+
+/* STUDS → combinación azul→naranja */
+.card.card-top.card-top--studs,
+.card-top.card-top--studs {
+  background: linear-gradient(180deg, #248689 0%, #f16536 100%) !important;
+  color: #fff !important;
+}
+
+/* Hover (sutil y consistente) */
+.card-top:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 6px 14px rgba(0,0,0,.12),
+    0 14px 28px rgba(0,0,0,.10);
+}
+
+/* Ajustes dentro de la card para que nada “herede” gris de Bootstrap */
+.card-top .card-body { background: transparent !important; }
+.card-top .text-white,
+.card-top .fw-bold,
+.card-top h5 { color: #fff !important; }
+
+/* Texto secundario sobre fondos de color */
+.card-top .text-muted,
+.card-top .small,
+.card-top .small.text-muted { color: rgba(255,255,255,.78) !important; }
+
+/* Los porcentajes (que tenías con text-danger-emphasis) en blanco para legibilidad */
+.card-top .right .fw-bold { color: #fff !important; }
+
+/* Lista de posiciones */
+.lista-top { list-style: none; padding: 0; margin: 0; }
+.lista-top li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,.25);
+}
+.lista-top li:last-child { border-bottom: 0; }
+.lista-top .left { display: flex; align-items: center; gap: 12px; }
+.lista-top .right { text-align: right; }
+
+/* Badge 1,2,3 */
+.rank-badge {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background-color: #ffffff;
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+
+/* Badge "TOP 3" siempre visible */
+.card-top .badge.bg-white { background-color: #fff !important; color: #111 !important; }
+
+
+/* responsive igual que noticias */
+@media (min-width: 1200px) {
+  .contenedor-estadisticas {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .contenedor-estadisticas {
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 24px;
+    gap: 24px;
+  }
+  .card-top { width: 100%; }
+}
