@@ -12,16 +12,21 @@ app.use(express.json());
 
 let db;
 
-// util edad con “cumple” 1 de julio (Argentina/hipódromo)
+// Utilidad: Calcular edad hípica (Cumpleaños el 1 de Julio)
 function calcularEdadActual(anoNacimiento) {
   if (!anoNacimiento) return null;
   const hoy = new Date();
   const y = hoy.getFullYear();
-  const mes = hoy.getMonth() + 1; // 1..12
+  const mes = hoy.getMonth() + 1; // Enero = 1, Julio = 7
+  
   let edad = y - Number(anoNacimiento);
-  // Si aún no pasó el 1 de julio, restar 1
-  if (mes < 7) edad -= 1;
-  return edad;
+  
+  // Si estamos antes del 1 de julio, restamos 1 año
+  if (mes < 7) {
+    edad -= 1;
+  }
+  
+  return edad > 0 ? edad : 0; // Evitar edades negativas
 }
 
 // ---------- Endpoint ----------
@@ -35,7 +40,7 @@ app.get("/api/buscar", async (req, res) => {
   console.log(`Buscando campaña de: ${nombreLimpio}`);
 
   try {
-    // Perfil + edad calculada en Node (robusto para el front)
+    // 1. Buscar Perfil del Caballo
     const perfil = await db.get(
       `SELECT * FROM Caballos WHERE nombre = ?`,
       [nombreLimpio]
@@ -45,9 +50,10 @@ app.get("/api/buscar", async (req, res) => {
       return res.status(404).json({ error: "Caballo no encontrado" });
     }
 
+    // Calcular edad actual en el momento de la consulta
     const edad_actual = calcularEdadActual(perfil.ano_nacimiento);
 
-    // Todas las actuaciones, ordenadas por fecha DESC + nro_carrera ASC
+    // 2. Buscar Actuaciones (Ordenadas por Fecha descendente)
     const actuacionesRaw = await db.all(
       `SELECT *
        FROM Actuaciones
@@ -56,13 +62,20 @@ app.get("/api/buscar", async (req, res) => {
       [perfil.id_caballo]
     );
 
-    // Normalizaciones para el front
+    // 3. Normalizar datos para el Frontend
     const actuaciones = actuacionesRaw.map((a) => {
-      const puesto = (a.puesto_final === "*" ? "NC" : a.puesto_final) || a.puesto_original || "-";
+      // Manejo de Puesto: Si es "*", mostramos "NC", sino el valor que venga
+      let puesto = a.puesto_final;
+      if (puesto === "*") puesto = "NC";
+      if (!puesto) puesto = a.puesto_original || "-";
+
       const premioNombre = a.premio || "Premio sin nombre";
+      
+      // Aquí agregamos " mts" porque en la DB ahora guardamos solo el número (ej: 1200)
       const distStr = a.distancia ? `${a.distancia} mts` : "";
-      let obs = a.observacion || "";
-      // Caso típico: si observación contiene “distanciado” y no trae puesto_final, lo dejamos textual
+      
+      const obs = a.observacion || "";
+
       return {
         ...a,
         puesto_final: puesto,
@@ -72,20 +85,23 @@ app.get("/api/buscar", async (req, res) => {
       };
     });
 
-    // último cuidador/caballeriza desde actuaciones reales
+    // 4. Buscar 'Últimos Datos Conocidos' (Cuidador/Caballeriza)
+    // Esto sirve para llenar la ficha de arriba si la última carrera no tiene datos
     const ultimos = await db.get(
       `SELECT cuidador, caballeriza 
        FROM Actuaciones 
-       WHERE id_caballo = ? AND (cuidador IS NOT NULL OR caballeriza IS NOT NULL)
+       WHERE id_caballo = ? AND (cuidador IS NOT NULL AND cuidador != '' OR caballeriza IS NOT NULL AND caballeriza != '')
        ORDER BY date(fecha) DESC LIMIT 1`,
       [perfil.id_caballo]
     );
 
+    // 5. Armar respuesta final
     const respuesta = {
       perfil: {
         ...perfil,
-        edad_actual: edad_actual,                // número (p.ej. 5)
-        edad_label: edad_actual ? `${edad_actual} años` : "años",
+        edad_actual: edad_actual,
+        edad_label: edad_actual ? `${edad_actual} años` : "S/D",
+        // Usamos el dato de la última actuación conocida, o "S/D" si nunca corrió con cuidador registrado
         cuidador_actual: ultimos?.cuidador || "S/D",
         caballeriza_actual: ultimos?.caballeriza || "S/D",
       },
@@ -93,21 +109,23 @@ app.get("/api/buscar", async (req, res) => {
     };
 
     res.json(respuesta);
+
   } catch (err) {
     console.error("Error en la base de datos:", err.message);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
-// ---------- Boot ----------
+// ---------- Inicialización del Servidor ----------
 (async () => {
   try {
     db = await open({
       filename: DATABASE_FILE,
       driver: sqlite3.Database,
-      mode: sqlite3.OPEN_READONLY
+      mode: sqlite3.OPEN_READONLY // Modo lectura para seguridad
     });
     console.log("Conectado exitosamente a la base de datos.");
+    
     app.listen(PORT, () => {
       console.log(`🚀 Servidor API corriendo en http://localhost:${PORT}`);
     });
