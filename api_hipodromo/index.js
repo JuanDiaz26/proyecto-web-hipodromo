@@ -90,7 +90,13 @@ app.get("/api/buscar", async (req, res) => {
     const ultimos = await db.get(
       `SELECT cuidador, caballeriza 
        FROM Actuaciones 
-       WHERE id_caballo = ? AND (cuidador IS NOT NULL AND cuidador != '' OR caballeriza IS NOT NULL AND caballeriza != '')
+       WHERE id_caballo = ? 
+       AND cuidador IS NOT NULL 
+       AND cuidador != '' 
+       AND cuidador != 'S/D'
+       AND caballeriza IS NOT NULL 
+       AND caballeriza != '' 
+       AND caballeriza != 'S/D'
        ORDER BY date(fecha) DESC LIMIT 1`,
       [perfil.id_caballo]
     );

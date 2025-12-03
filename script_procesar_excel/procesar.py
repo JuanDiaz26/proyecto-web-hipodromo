@@ -4,6 +4,8 @@ import os
 import re
 from datetime import datetime
 
+print(">>> INICIANDO PROCESAMIENTO V31 (BLINDAJE TOTAL RESULTADOS)...")
+
 # --- CONFIGURACIÓN ---
 CARPETA_PROGRAMAS = "programas"
 CARPETA_RESULTADOS = "resultados"
@@ -19,62 +21,62 @@ MESES_ES = {
 def norm_txt(s):
     if s is None: return ""
     s = str(s).upper().strip()
-    # Limpieza básica de caracteres
     s = s.replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U').replace('Ñ','N')
+    s = s.replace('"', '').replace("'", "")
     s = re.sub(r'\s+', ' ', s)
     return s
 
-def es_nombre_valido(texto):
-    """
-    V17: FILTRO ANTI-FANTASMA.
-    Analiza si el texto es un nombre real o una línea de tabulada (ej: '2º a 3 cp de Teenek').
-    """
+def es_peso_valido(texto):
+    if not texto: return False
+    raw = str(texto).strip()
+    if "'" in raw or '"' in raw: return False
+    # Busca numero 40-69
+    return bool(re.search(r'\b[4-6]\d(\.|,)?\d?\b', raw))
+
+def es_pelaje_valido(texto):
     if not texto: return False
     t = norm_txt(texto)
-    
-    # 1. Longitud excesiva (un nombre de caballo no suele pasar de 25-30 letras)
-    if len(t) > 30: return False 
-    
-    # 2. Rechazar si empieza con números (Ej: "24/09/25" o "2º ...")
-    # Los nombres de caballos nunca empiezan con número.
-    if t and t[0].isdigit(): return False
+    if len(t) < 3: return False
+    pelajes = ['ZAIN', 'ALAZ', 'TORDI', 'OSC', 'ZNI', 'ALZ', 'ZD', 'ZN', 'GATEADO', 'LOBUNO', 'MORO', 'ROSILO', 'PICAZO', 'RUIANO', 'BAYO', 'TOSTADO', 'OVERO', 'BLANCO', 'COLORADO', 'DORADILLO']
+    for p in pelajes:
+        if p in t: return True
+    return False
 
-    # 3. Palabras prohibidas típicas de descripciones de carrera
-    patrones_prohibidos = [
-        r'\bCP\b',     # "3 CP"
-        r'\bCPOS\b',   # "3 CPOS"
-        r'\bAL\s+\d',  # "AL 3" (Al 3er puesto)
-        r'\d{2}/\d{2}',# Fechas tipo 22/05
-        r'\d\'',       # Tiempos tipo 1'22"
-        r'\bDE\b.{3,}\bDE\b' # "de ... de"
+def es_nombre_valido(texto):
+    if not texto: return False
+    t = norm_txt(texto)
+    if len(t) > 28 or len(t) < 3: return False
+    if t[0].isdigit(): return False 
+
+    patrones = [
+        r'\bCP\b', r'\bCPOS\b', r'\bPZO\b', r'\bCZA\b', r'\bHOC\b', 
+        r'\bAL\s+\d', r'\d{2}/\d{2}', r'\bVS\b', 
+        r'\bDE\b.{3,}\bDE\b',
+        r'\bCP\s+DE\b', r'\bCPOS\s+DE\b' # "cp de", "cpos de" -> CLAVE PARA TEENEK
     ]
-    
-    for pat in patrones_prohibidos:
+    for pat in patrones:
         if re.search(pat, t): return False
     
+    if " DE " in t:
+        nombres_con_de = ["FLOR DE", "HIJO DE", "OJO DE", "LUZ DE", "MAR DE", "SOL DE", "ALMA DE", "NOCHE DE", "DAMA DE", "REINA DE"]
+        if not any(x in t for x in nombres_con_de): return False
+
     return True
 
 def estandarizar_observacion(texto):
-    """Limpia las observaciones largas."""
     if not texto: return None
     t = texto.upper()
-    if any(x in t for x in ["RETIRADO", "ESCAP", "DISPAR", "NEGÓ", "PARTIDORES"]):
-        return "Retirado de los partidores"
+    if any(x in t for x in ["RETIRADO", "ESCAP", "DISPAR", "NEGÓ", "PARTIDORES"]): return "Retirado de los partidores"
     if "ROD" in t: return "Rodó"
-    if "DISTANCIADO" in t or "DIST." in t:
-        m = re.search(r'AL\s*(\d+)', t)
-        if m: return f"Distanciado al {m.group(1)}º"
-        return "Distanciado"
+    if "DIST" in t: return "Distanciado"
     if "SUJETA" in t or "SOFREN" in t: return "Sofrenó"
     return texto.capitalize()
 
 def limpiar_distancia(texto):
     if not texto: return None
     t = str(texto).replace('.', '')
-    # Prioridad: "mts"
     m_expl = re.search(r'(?<!\d)(\d{3,4})\s*(?:mts|m|metros)\b', t, re.I)
     if m_expl: return int(m_expl.group(1))
-    # Secundario: Numeros lógicos aislados
     numeros = re.findall(r'\b(\d{3,4})\b', t)
     validos = [int(n) for n in numeros if 400 <= int(n) <= 3000]
     if len(validos) == 1: return validos[0]
@@ -83,9 +85,9 @@ def limpiar_distancia(texto):
 def limpiar_nro_carrera(texto):
     if not texto: return 1
     t = norm_txt(texto)
-    m = re.search(r'\b(\d+)(?:°|º|ª|DA|RA|TA)?\s*CARRERA', t)
+    m = re.search(r'\b(\d+)(?:°|º|ª|DA|RA|TA|MO)?\s*CARRERA', t)
     if m: return int(m.group(1))
-    if t.isdigit(): return int(t) # Soporte para celdas que solo tienen el número
+    if t.isdigit() and int(t) < 25: return int(t)
     return 1
 
 def extraer_estado_pista(texto):
@@ -112,11 +114,13 @@ def parsear_fecha_reunion(texto):
         y = int(y_str)
         if y < 100: y += 2000
         if mes in MESES_ES: return datetime(y, MESES_ES[mes], d)
-    m = re.search(r'(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})', texto)
-    if m:
-        d, M, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
-        if y < 100: y += 2000
-        return datetime(y, M, d)
+    matches = re.findall(r'(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})', texto)
+    for d_str, m_str, y_str in matches:
+        try:
+            d, M, y = int(d_str), int(m_str), int(y_str)
+            if y < 100: y += 2000
+            if 1 <= M <= 12 and 1 <= d <= 31: return datetime(y, M, d)
+        except: continue
     return None
 
 def derivar_sexo(pelo):
@@ -128,7 +132,7 @@ def derivar_sexo(pelo):
 # --- DB ---
 def crear_base_de_datos():
     if os.path.exists(DATABASE_FILE):
-        try: os.remove(DATABASE_FILE); print(">>> DB Vieja eliminada (V17).")
+        try: os.remove(DATABASE_FILE); print(">>> DB Vieja eliminada (V31).")
         except: pass
     conn = sqlite3.connect(DATABASE_FILE)
     c = conn.cursor()
@@ -151,12 +155,9 @@ def crear_base_de_datos():
     conn.close()
 
 def get_or_create_caballo(conn, nombre, datos_extra={}):
-    # FILTRO V17: Si no es nombre valido, se rechaza
     if not es_nombre_valido(nombre): return None
-    
     nombre = norm_txt(nombre)
     if not nombre or len(nombre) < 2: return None
-    
     cur = conn.cursor()
     cur.execute("SELECT * FROM Caballos WHERE nombre=?", (nombre,))
     row = cur.fetchone()
@@ -172,12 +173,13 @@ def get_or_create_caballo(conn, nombre, datos_extra={}):
 
     if row:
         idc = row[0]
+        # UPDATE AGRESIVO
         upd, vals = [], []
-        if not row[2] and datos_extra.get('padre'): upd.append("padre=?"); vals.append(datos_extra['padre'])
-        if not row[3] and datos_extra.get('madre'): upd.append("madre=?"); vals.append(datos_extra['madre'])
-        if not row[4] and datos_extra.get('pelo'):  upd.append("pelo=?");  vals.append(datos_extra['pelo'])
-        if not row[5] and sexo_derivado:            upd.append("sexo=?");  vals.append(sexo_derivado)
-        if not row[6] and ano_nac:                  upd.append("ano_nacimiento=?"); vals.append(ano_nac)
+        if datos_extra.get('padre'): upd.append("padre=?"); vals.append(datos_extra['padre'])
+        if datos_extra.get('madre'): upd.append("madre=?"); vals.append(datos_extra['madre'])
+        if datos_extra.get('pelo'):  upd.append("pelo=?");  vals.append(datos_extra['pelo'])
+        if sexo_derivado:            upd.append("sexo=?");  vals.append(sexo_derivado)
+        if ano_nac:                  upd.append("ano_nacimiento=?"); vals.append(ano_nac)
         if upd:
             sql = f"UPDATE Caballos SET {', '.join(upd)} WHERE id_caballo=?"
             vals.append(idc)
@@ -194,10 +196,7 @@ def corregir_cuidador_stud(cuid, stud):
     c = norm_txt(cuid)
     s = norm_txt(stud)
     studs_conocidos = ['L.C.J.', 'L.C.J', 'LCJ', 'MIS NIETOS', 'LA POROTA', 'EL BEDUINO']
-    es_stud_en_cuid = False
-    if c in studs_conocidos: es_stud_en_cuid = True
-    elif len(c) <= 4 and len(c) > 0 and "." in c: es_stud_en_cuid = True 
-    if es_stud_en_cuid and len(s) > 5:
+    if (c in studs_conocidos or (len(c)<=4 and "." in c)) and len(s) > 5:
         return s, c 
     return cuid, stud
 
@@ -245,6 +244,7 @@ def procesar_programa(ruta, conn):
                     elif "PADRE" in val: col_map['padre'] = c
                     elif "E" == val or "EDAD" in val: col_map['edad'] = c
                     elif "Nº" in val or "N°" in val: col_map['mandil'] = c
+                    elif "KG" in val: col_map['peso'] = c
                 break
         
         start_data = (fila_titulos + 1) if fila_titulos else (inicio + 2)
@@ -254,29 +254,46 @@ def procesar_programa(ruta, conn):
             try:
                 datos = {}
                 nombre = None
+                
+                # MODO NUEVO
                 if fila_titulos and 'caballo' in col_map:
                     raw_nom = str(row.iloc[col_map['caballo']])
-                    # FILTRO V17: Nombre valido?
                     if es_nombre_valido(raw_nom):
                         nombre = raw_nom
                         for k, v in col_map.items():
                             if k != 'caballo': datos[k] = str(row.iloc[v])
+                
+                # MODO VIEJO (V31: CRITERIO DUAL REFORZADO)
                 else:
                     if len(row) > 8:
                         posible_nom = str(row.iloc[2])
-                        # FILTRO V17: Nombre valido?
-                        if es_nombre_valido(posible_nom):
+                        posible_pelo = str(row.iloc[3])
+                        posible_peso = str(row.iloc[5]) 
+                        
+                        es_caballo_real = es_pelaje_valido(posible_pelo) or es_peso_valido(posible_peso)
+
+                        if es_nombre_valido(posible_nom) and es_caballo_real:
                             nombre = posible_nom
-                            datos['pelo'] = str(row.iloc[3])
+                            datos['pelo'] = posible_pelo
+                            
+                            # Logica Padres/Stud
+                            raw_G = str(row.iloc[6]).strip()
+                            raw_H = str(row.iloc[7]).strip()
+                            if "-" in raw_G and len(raw_G) > 5:
+                                datos['padre'] = raw_G 
+                            elif "-" in raw_H and len(raw_H) > 5:
+                                datos['padre'] = raw_H 
+                            else:
+                                datos['padre'] = raw_G 
+
                             val_J = str(row.iloc[9]).strip() if len(row) > 9 else ""
                             if len(val_J) > 3:
                                 datos['stud'] = str(row.iloc[8])
                                 datos['cuidador'] = val_J
-                                datos['padre'] = str(row.iloc[7])
                             else:
-                                datos['padre'] = str(row.iloc[6])
                                 datos['stud'] = str(row.iloc[7])
                                 datos['cuidador'] = str(row.iloc[8])
+
                             try: datos['edad'] = str(row.iloc[5]).split()[0]
                             except: pass
                             try: datos['mandil'] = int(float(str(row.iloc[1])))
@@ -284,10 +301,14 @@ def procesar_programa(ruta, conn):
 
                 if nombre and "CARRERA" not in norm_txt(nombre):
                     p, m = None, None
-                    if datos.get('padre') and '-' in datos.get('padre'):
-                        parts = datos['padre'].split('-')
-                        p, m = parts[0].strip(), parts[1].strip()
-                    else: p = datos.get('padre')
+                    raw_p = datos.get('padre', '')
+                    if raw_p and '-' in raw_p:
+                        parts = raw_p.split('-')
+                        if len(parts) >= 2:
+                            p = parts[0].strip()
+                            m = parts[1].strip()
+                    elif raw_p:
+                        p = raw_p.strip()
 
                     c_raw = datos.get('cuidador')
                     s_raw = datos.get('stud')
@@ -306,7 +327,6 @@ def procesar_programa(ruta, conn):
                             WHERE id_caballo=? AND fecha=? AND nro_carrera=?
                         """, (c_final, s_final, datos.get('jockey'), datos.get('mandil'), distancia, premio,
                               idc, fecha_str, nro_carrera))
-                        
                         if cur.rowcount == 0:
                             cur.execute("""
                                 INSERT INTO Actuaciones 
@@ -317,7 +337,7 @@ def procesar_programa(ruta, conn):
                         conn.commit()
             except Exception as e: pass
 
-# --- RESULTADO ---
+# --- RESULTADO (V31: AQUI ESTA LA MAGIA DEL FILTRO DOBLE) ---
 def procesar_resultado(ruta, conn):
     print(f"RES: {os.path.basename(ruta)}")
     try: df = pd.read_excel(ruta, header=None).fillna('')
@@ -340,8 +360,8 @@ def procesar_resultado(ruta, conn):
         txt_header = " ".join(bloque_header.iloc[:, 1:].astype(str).values.flatten())
         
         txt_carrera_linea = " ".join(df.iloc[inicio].astype(str)).upper()
-        nro_carrera_raw = limpiar_nro_carrera(txt_carrera_linea)
-        if nro_carrera_raw == 1 and i > 0: nro_carrera_raw = i + 1
+        nro_carrera = limpiar_nro_carrera(txt_carrera_linea)
+        if nro_carrera == 1 and i > 0: nro_carrera = i + 1
 
         distancia_real = limpiar_distancia(txt_header)
         premio_real = None
@@ -374,6 +394,14 @@ def procesar_resultado(ruta, conn):
                         start_table = r; break
             if col_puesto != -1: break
             
+        # Fallback 2021
+        if col_puesto == -1:
+             try:
+                 posible_puesto = str(df.iloc[inicio+6, 1]).strip()
+                 if posible_puesto == '1':
+                     col_puesto = 1; col_caballo = 2; start_table = inicio + 6
+             except: pass
+
         if col_puesto != -1:
             for r in range(start_table, fin):
                 row = df.iloc[r]
@@ -389,24 +417,19 @@ def procesar_resultado(ruta, conn):
                         motivo_nc = estandarizar_observacion(raw_motivo)
                         es_nc = True
                 elif re.match(r'^(\d+|U|NC)$', puesto_raw):
-                    nombre = str(row.iloc[col_caballo]).strip()
+                    if col_caballo < len(row):
+                        nombre = str(row.iloc[col_caballo]).strip()
                 
-                # FILTRO V17: RECHAZA TABULADAS EN RESULTADOS
+                # FILTRO V31: APLICADO TAMBIEN A RESULTADOS
                 if not es_nombre_valido(nombre): continue
 
                 jockey = None
-                # BUSQUEDA DINAMICA DE JOCKEY V17:
-                # Si col_caballo+2 es un numero (kilos), probamos la siguiente (col+3)
                 if not es_nc:
-                    idx_jockey = col_caballo + 2
-                    if idx_jockey < len(row):
-                        posible_jockey = str(row.iloc[idx_jockey]).strip()
-                        if posible_jockey.replace('.','').isdigit() or len(posible_jockey) < 3:
-                            # Parece kilo, probamos +1
-                            if idx_jockey + 1 < len(row):
-                                jockey = str(row.iloc[idx_jockey + 1])
-                        else:
-                            jockey = posible_jockey
+                    for k in range(col_caballo + 1, min(col_caballo + 4, len(row))):
+                        val = str(row.iloc[k]).strip()
+                        if len(val) > 3 and not val.replace('.','').isdigit():
+                            jockey = val
+                            break
 
                 cuid_actual, stud_actual = None, None
                 if puesto_raw == '1' or puesto_raw == '1RO':
@@ -427,9 +450,8 @@ def procesar_resultado(ruta, conn):
                                 WHERE id_caballo=? AND fecha=? AND nro_carrera=?
                             """, (motivo_nc, premio_real, distancia_real, estado_pista_real, idc, fecha_str, target_nro))
                         else:
-                            # Protegemos el premio original si el nuevo es generico
+                            # SOBERANIA DE PROGRAMA
                             premio_final = premio_real if premio_real and "SIN NOMBRE" not in premio_real.upper() else None
-                            
                             cur.execute("""
                                 UPDATE Actuaciones 
                                 SET puesto_original=?, puesto_final=?, 
@@ -443,13 +465,13 @@ def procesar_resultado(ruta, conn):
                     else:
                         if es_nc:
                             cur.execute("INSERT INTO Actuaciones (id_caballo, fecha, nro_carrera, puesto_final, observacion, premio, distancia, estado_pista) VALUES (?,?,?,?,?,?,?,?)",
-                                        (idc, fecha_str, nro_carrera_raw, 'NC', motivo_nc, premio_real, distancia_real, estado_pista_real))
+                                        (idc, fecha_str, nro_carrera, 'NC', motivo_nc, premio_real, distancia_real, estado_pista_real))
                         else:
                             cur.execute("""
                                 INSERT INTO Actuaciones 
                                 (id_caballo, fecha, nro_carrera, puesto_original, puesto_final, jockey, cuidador, caballeriza, premio, distancia, estado_pista)
                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            """, (idc, fecha_str, nro_carrera_raw, puesto_raw, puesto_raw if puesto_raw!='U' else 'NC', 
+                            """, (idc, fecha_str, nro_carrera, puesto_raw, puesto_raw if puesto_raw!='U' else 'NC', 
                                   jockey, cuid_actual, stud_actual, premio_real, distancia_real, estado_pista_real))
                     conn.commit()
 
@@ -460,4 +482,4 @@ if __name__ == "__main__":
     
     res = sorted([os.path.join(CARPETA_RESULTADOS, f) for f in os.listdir(CARPETA_RESULTADOS) if f.endswith(('xlsx', 'xls')) and not f.startswith('~$')])
     for r in res: procesar_resultado(r, sqlite3.connect(DATABASE_FILE))
-    print("--- FIN V17.0 (ANTI-TABULADAS Y JOCKEY DINAMICO) ---")
+    print("--- FIN V31.0 (BLINDAJE TOTAL RESULTADOS) ---")
