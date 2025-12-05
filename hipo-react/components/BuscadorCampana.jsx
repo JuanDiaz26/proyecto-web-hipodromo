@@ -6,7 +6,7 @@ const styles = `
   .buscador-container {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     padding: 20px;
-    max-width: 1200px;
+    max-width: 1250px; /* Un poco más ancho para que entre todo cómodo */
     margin: 20px auto;
     background: #f4f7f6;
     border-radius: 8px;
@@ -93,7 +93,7 @@ const styles = `
     font-size: 0.90rem;
   }
   .tabla-actuaciones th, .tabla-actuaciones td {
-    padding: 10px 12px;
+    padding: 8px 10px;
     text-align: left;
     border-bottom: 1px solid #ddd;
     vertical-align: middle;
@@ -103,7 +103,7 @@ const styles = `
     font-weight: bold;
     color: #495057;
     text-transform: uppercase;
-    font-size: 0.80rem;
+    font-size: 0.75rem;
     letter-spacing: 0.5px;
   }
   .tabla-actuaciones tr:hover {
@@ -112,76 +112,37 @@ const styles = `
   
   /* --- COLUMNAS PERSONALIZADAS --- */
   
-  /* Fecha: Ancho fijo para que no baile */
-  .col-fecha { 
-    width: 90px; 
-    white-space: nowrap;
-  }
+  .col-fecha { width: 85px; white-space: nowrap; }
+  .col-puesto { width: 35px; text-align: center !important; padding: 5px !important; }
+  .col-premio { max-width: 150px; min-width: 120px; white-space: normal; line-height: 1.1; font-size: 0.8rem; }
+  .col-dist { width: 50px; text-align: center !important; }
   
-  /* Puesto: Centrado y finito */
-  .col-puesto { 
-    width: 40px; 
-    text-align: center !important; 
-    padding-left: 5px !important; 
-    padding-right: 5px !important; 
-  }
-  
-  /* PREMIO: El cambio clave para que baje la linea */
-  .col-premio {
-    max-width: 200px;       /* Ancho maximo antes de bajar */
-    min-width: 140px;
-    white-space: normal;    /* Permite saltos de linea */
-    line-height: 1.2;       /* Lineas mas juntas */
-    font-size: 0.85rem;     /* Letra un pelin mas chica */
-  }
+  /* NUEVA COLUMNA PISTA */
+  .col-pista { width: 50px; text-align: center !important; font-weight: 600; color: #555; }
 
-  /* Distancia y Tiempo: Centrados */
-  .col-dist { 
-    width: 60px; 
-    text-align: center !important; 
-  }
-  .col-tiempo { 
-    width: 70px; 
-    text-align: center !important;
-  }
+  .col-tiempo { width: 80px; white-space: nowrap; font-family: monospace; text-align: center !important; }
   
   /* Estilos de datos */
   .puesto-badge {
     display: inline-block;
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
     border-radius: 50%;
     background: #e9ecef;
     color: #333;
     font-weight: bold;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
   .puesto-badge.primero {
     background: #ffd700;
     color: #000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   }
   
-  /* Jockey con Peso abajo */
-  .jockey-cell {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-  }
-  .peso-badge {
-    font-size: 0.75rem;
-    color: #dc3545;
-    font-weight: bold;
-    margin-top: 3px;
-  }
-
-  .obs-cell {
-    font-size: 0.85rem;
-    color: #555;
-    font-style: italic;
-    max-width: 200px; /* Tambien limitamos observacion por las dudas */
-  }
+  .jockey-cell { display: flex; flex-direction: column; line-height: 1; }
+  .peso-badge { font-size: 0.7rem; color: #dc3545; font-weight: bold; margin-top: 3px; }
+  .obs-cell { font-size: 0.8rem; color: #555; font-style: italic; max-width: 180px; }
 `;
 
 function BuscadorCampana() {
@@ -223,7 +184,6 @@ function BuscadorCampana() {
     return `${day}/${month}/${year.slice(-2)}`;
   };
 
-  // Lógica de color Rosa/Azul
   let headerColor = '#004a99'; 
   if (caballoData && caballoData.perfil) {
     const p = caballoData.perfil;
@@ -302,8 +262,9 @@ function BuscadorCampana() {
                   <tr>
                     <th className="col-fecha">Fecha</th>
                     <th className="col-puesto">Pos</th>
-                    <th className="col-premio">Premio</th> {/* CLASE NUEVA APLICADA */}
+                    <th className="col-premio">Premio</th>
                     <th className="col-dist">Dist.</th>
+                    <th className="col-pista">Pista</th> {/* NUEVA COLUMNA */}
                     <th className="col-tiempo">Tiempo</th>
                     <th>Jockey</th>
                     <th>Cuidador</th>
@@ -320,8 +281,9 @@ function BuscadorCampana() {
                           {act.puesto_final}
                         </span>
                       </td>
-                      <td className="col-premio">{act.premio}</td> {/* CLASE NUEVA APLICADA */}
+                      <td className="col-premio">{act.premio}</td>
                       <td className="col-dist">{act.distancia}</td>
+                      <td className="col-pista">{act.pista}</td> {/* DATO NUEVO */}
                       <td className="col-tiempo">{act.tiempo}</td>
                       <td>
                         <div className="jockey-cell">
