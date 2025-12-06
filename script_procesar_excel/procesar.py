@@ -4,7 +4,7 @@ import os
 import re
 from datetime import datetime
 
-print(">>> INICIANDO PROCESAMIENTO V92 (CALCULADORA DE CUERPOS + ESTRUCTURA COMPLETA)...")
+print(">>> INICIANDO PROCESAMIENTO V94 (PREMIOS CON COMILLAS + BORRADOS ';' + CUERPOS)...")
 
 # --- CONFIGURACIÓN ---
 CARPETA_PROGRAMAS = "programas"
@@ -63,7 +63,14 @@ def es_nombre_valido(texto):
 
 def es_fila_basura_o_tabulada(texto_fila):
     t = str(texto_fila).upper()
+    # Proteger notas de distanciamiento
     if "TRATAMIENTO" in t or "MEDICAMENTOSO" in t or "DISTANCIADO" in t: return False
+    
+    # Freno de mano
+    if "TIEMPO:" in t or "TIEMPO :" in t: return True
+    if "DIVIDENDOS" in t or "APUESTA" in t: return True
+    if "NO CORRI" in t or "RETIRADO" in t: return True 
+
     if re.search(r'\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2}', t): return True
     if re.search(r'\d+\'\d+', t): return True
     if re.search(r'[\-\s](PN|PP|PH|PB|PF)[\-\s]', t): return True
@@ -71,28 +78,44 @@ def es_fila_basura_o_tabulada(texto_fila):
     if re.search(r'\d+[º°]?\s+A\s+\d', t): return True
     return False
 
-def limpiar_premio_v55(txt_header):
+def limpiar_premio_v94(txt_header):
+    """
+    V94: Soporte estricto para PREMIO "NOMBRE" y variantes.
+    """
     if not txt_header: return "Sin Nombre"
-    flat = re.sub(r'\s+', ' ', txt_header).upper().replace('""', '"').replace("''", "'")
-    m_comillas = re.search(r'["“](.+?)["”]', flat)
-    if m_comillas:
-        candidato = m_comillas.group(1).strip()
-        if not es_fila_basura_o_tabulada(candidato) and len(candidato) > 3:
-            idx = m_comillas.start()
-            window = flat[max(0, idx-30):idx]
-            m_tipo = re.search(r'(GRAN PREMIO|CLASICO|ESPECIAL|HANDICAP|COPA)', window)
-            if m_tipo: return f"{m_tipo.group(1)} {candidato}"
-            return "Premio " + candidato
+    
+    # Aplanar y normalizar comillas (convertir todo a comilla simple o doble estandar)
+    flat = re.sub(r'\s+', ' ', str(txt_header)).upper()
+    flat = flat.replace('""', '"').replace("''", "'").replace("“", '"').replace("”", '"')
 
-    keywords = ["GRAN PREMIO", "CLASICO", "ESPECIAL", "HANDICAP", "COPA", "PREMIO"]
-    pattern = r'(?:' + '|'.join(keywords) + r')\s+([A-Z\s\.]+)'
-    m_prem = re.search(pattern, flat)
-    if m_prem:
-        tipo = re.search(r'(?:' + '|'.join(keywords) + r')', m_prem.group(0)).group(0)
-        nombre = m_prem.group(1).strip()
-        nombre = re.split(r'[\-\d]|METROS|DISTANCIA', nombre)[0].strip()
+    # 1. Caso: PALABRA CLAVE + COMILLAS -> GRAN PREMIO "BATALLA"
+    # Captura: (TIPO) " (NOMBRE) "
+    m_quote = re.search(r'(GRAN PREMIO|CLASICO|ESPECIAL|HANDICAP|COPA|PREMIO)\s*["\']([^"\']+)["\']', flat)
+    if m_quote:
+        tipo = m_quote.group(1).strip()
+        nombre = m_quote.group(2).strip()
+        # Limpieza extra del nombre
+        nombre = re.split(r'[\-\d]|METROS', nombre)[0].strip()
+        return f"{tipo} {nombre}"
+
+    # 2. Caso: SOLO COMILLAS -> "DIA DEL MAESTRO"
+    m_only_quote = re.search(r'["\']([^"\']+)["\']', flat)
+    if m_only_quote:
+        nombre = m_only_quote.group(1).strip()
         if len(nombre) > 3 and not es_fila_basura_o_tabulada(nombre):
+            # Si no dice Premio, le agregamos "Premio" por defecto si no es clasico
+            return f"PREMIO {nombre}"
+
+    # 3. Caso: PALABRA CLAVE SIN COMILLAS -> CLASICO APERTURA
+    m_plain = re.search(r'(GRAN PREMIO|CLASICO|ESPECIAL|HANDICAP|COPA|PREMIO)\s+([A-Z\s\.]+)', flat)
+    if m_plain:
+        tipo = m_plain.group(1).strip()
+        raw_nombre = m_plain.group(2).strip()
+        # Cortar antes de basura
+        nombre = re.split(r'[\-\d]|METROS|DISTANCIA', raw_nombre)[0].strip()
+        if len(nombre) > 3:
             return f"{tipo} {nombre}"
+
     return "Sin Nombre"
 
 def estandarizar_observacion(texto):
@@ -204,27 +227,23 @@ def derivar_sexo(pelo):
     if p.endswith("A") and not p.endswith("O") and "COLORADO" not in p and "DORADILLO" not in p: return "Hembra"
     return "Macho"
 
-# --- V92: CALCULADORA DE CUERPOS ---
+# --- CALCULADORA DE CUERPOS ---
 def parsear_cuerpos_a_float(txt_cuerpos):
     if not txt_cuerpos: return 0.0
-    t = str(txt_cuerpos).upper().strip()
+    t = str(txt_cuerpos).upper().replace(' ', '')
     
-    # Lista de distancias visuales que NO suman (0)
-    no_suman = ["V.M", "HOC", "CZA", "S.A", "S/A"]
+    no_suman = ["V.M", "HOC", "CZA", "S.A", "S/A", "EMP", "PUESTO"]
     for x in no_suman:
         if x in t: return 0.0
     
-    if "1/2 CZA" in t or "1/2 PZO" in t: return 0.0
+    if "1/2CZA" in t or "1/2PZO" in t: return 0.0
     
     val = 0.0
-    # PZO suma
     if "PZO" in t: val += 0.25
     
-    # Enteros
-    m_int = re.search(r'(\d+)(?:\s|$)', t) # Digitos seguidos de espacio o fin
+    m_int = re.search(r'(\d+)', t)
     if m_int: val += float(m_int.group(1))
     
-    # Fracciones
     if "1/2" in t: val += 0.5
     elif "3/4" in t: val += 0.75
     elif "1/4" in t: val += 0.25
@@ -236,7 +255,6 @@ def formatear_float_a_cuerpos(valor):
     entero = int(valor)
     decimal = valor - entero
     
-    # Redondeo de seguridad por flotantes
     if 0.20 < decimal < 0.30: decimal = 0.25
     elif 0.45 < decimal < 0.55: decimal = 0.5
     elif 0.70 < decimal < 0.80: decimal = 0.75
@@ -248,15 +266,15 @@ def formatear_float_a_cuerpos(valor):
     elif decimal == 0.5: frac_str = "1/2"
     elif decimal == 0.75: frac_str = "3/4"
     
-    if entero > 0 and frac_str: return f"{entero} {frac_str}"
-    elif entero > 0: return f"{entero}"
-    elif frac_str: return frac_str
+    if entero > 0 and frac_str: return f"{entero} {frac_str} cp"
+    elif entero > 0: return f"{entero} cp"
+    elif frac_str: return f"{frac_str} cp"
     return ""
 
 # --- DB ---
 def crear_base_de_datos():
     if os.path.exists(DATABASE_FILE):
-        try: os.remove(DATABASE_FILE); print(">>> DB Vieja eliminada (V92).")
+        try: os.remove(DATABASE_FILE); print(">>> DB Vieja eliminada (V94).")
         except: pass
     conn = sqlite3.connect(DATABASE_FILE)
     c = conn.cursor()
@@ -326,10 +344,11 @@ def corregir_cuidador_stud(cuid, stud):
     if (c in studs_conocidos) and (s not in studs_conocidos): return s, c 
     return cuid, stud
 
-def recalcular_posiciones_v90(competidores, footer_txt):
+def recalcular_posiciones_v94(competidores, footer_txt):
     footer = str(footer_txt).upper()
     es_medicamentoso = "MEDICAMENTOSO" in footer or "TRATAMIENTO" in footer
     es_molestia = "MOLESTAR" in footer or "DISTANCIADO AL" in footer
+    
     m_pos = re.search(r'(?:DIST|MOLEST)[A-Z\.\s]*AL\s+(\d{1,2})', footer)
     target_pos = int(m_pos.group(1)) if m_pos else None
     if target_pos and target_pos > 25: target_pos = None
@@ -378,24 +397,29 @@ def recalcular_posiciones_v90(competidores, footer_txt):
             else: c['puesto_final'] = str(c['puesto_num'])
     return validos + otros
 
-def verificar_y_borrar_no_corrieron_v90(conn, footer_txt, fecha_str, nro_carrera):
+# --- V94: LIMPIEZA CON SPLIT POR PUNTO Y COMA ---
+def verificar_y_borrar_no_corrieron_v94(conn, footer_txt, fecha_str, nro_carrera):
     footer_upper = str(footer_txt).upper()
     m = re.search(r'(?:NO CORRIERON|NO CORRIO)[:\s]+', footer_upper)
     if not m: return
+    
     texto_nc = footer_upper[m.end():]
     idx_corte = len(texto_nc)
     for sep in ["CUIDADOR", "PROCEDENCIA", "TIEMPO", "RECORD", "DIVIDENDOS", "GANADOR"]:
         i = texto_nc.find(sep)
         if i != -1 and i < idx_corte: idx_corte = i
     texto_nc = texto_nc[:idx_corte]
-    matches = re.findall(r'\((\d+[A-Z]?)\)\s*([A-Z\s\']+)', texto_nc)
+
+    # TRITURADORA: Cortar por ; o , o Y
+    partes = re.split(r'[;,\.]|\s+Y\s+', texto_nc)
     
-    for nro_mandil, raw_nombre in matches:
-        nombre_limpio = norm_txt(raw_nombre).strip()
-        idx_caballo = texto_nc.find(raw_nombre)
-        if idx_caballo == -1: continue
-        contexto = texto_nc[idx_caballo + len(raw_nombre): idx_caballo + len(raw_nombre) + 60]
-        es_retiro = "PARTIDOR" in contexto or "RETIRAD" in contexto or "ESCAP" in contexto
+    for parte in partes:
+        nombre_limpio = re.sub(r'\(\d+[A-Z]?\)', '', parte).strip()
+        nombre_limpio = norm_txt(nombre_limpio)
+        
+        if len(nombre_limpio) < 3: continue
+        
+        es_retiro = "PARTIDOR" in parte or "RETIRAD" in parte or "ESCAP" in parte
         
         cur = conn.cursor()
         cur.execute("SELECT id_caballo FROM Caballos WHERE nombre=?", (nombre_limpio,))
@@ -403,14 +427,14 @@ def verificar_y_borrar_no_corrieron_v90(conn, footer_txt, fecha_str, nro_carrera
         if row:
             idc = row[0]
             if es_retiro:
-                print(f"   [V90] UPDATE RETIRADO: {nombre_limpio}")
+                print(f"   [V94] UPDATE RETIRADO: {nombre_limpio}")
                 cur.execute("""
                     UPDATE Actuaciones SET puesto_final='NC', observacion='Retirado de los partidores'
-                    WHERE id_caballo=? AND fecha=?
-                """, (idc, fecha_str))
+                    WHERE id_caballo=? AND fecha=? AND nro_carrera=?
+                """, (idc, fecha_str, nro_carrera))
             else:
-                print(f"   [V90] DELETE NO CORRIO: {nombre_limpio}")
-                cur.execute("DELETE FROM Actuaciones WHERE id_caballo=? AND fecha=?", (idc, fecha_str))
+                print(f"   [V94] DELETE NO CORRIO: {nombre_limpio}")
+                cur.execute("DELETE FROM Actuaciones WHERE id_caballo=? AND fecha=? AND nro_carrera=?", (idc, fecha_str, nro_carrera))
             conn.commit()
 
 # --- PROGRAMA ---
@@ -435,7 +459,7 @@ def procesar_programa(ruta, conn):
         nro_carrera = limpiar_nro_carrera(txt_carrera_linea)
         if nro_carrera == 1 and i > 0: nro_carrera = i + 1 
         distancia = limpiar_distancia_header(txt_header)
-        premio = "CARRERA CONCERTADA" if (distancia and distancia <= 600) else limpiar_premio_v55(txt_header)
+        premio = "CARRERA CONCERTADA" if (distancia and distancia <= 600) else limpiar_premio_v94(txt_header)
         fila_titulos = None
         col_map = {}
         for r_idx in range(inicio, min(inicio+20, fin)):
@@ -546,7 +570,7 @@ def procesar_resultado(ruta, conn):
         nro_carrera = limpiar_nro_carrera(txt_carrera_linea)
         if nro_carrera == 1 and i > 0: nro_carrera = i + 1
         distancia_real = limpiar_distancia_header(txt_header)
-        premio_real = "CARRERA CONCERTADA" if (distancia_real and distancia_real <= 600) else limpiar_premio_v55(txt_header)
+        premio_real = "CARRERA CONCERTADA" if (distancia_real and distancia_real <= 600) else limpiar_premio_v94(txt_header)
         estado_pista_real = extraer_estado_pista(txt_header)
         if not estado_pista_real: estado_pista_real = pista_global
         txt_footer = " ".join(df.iloc[min(inicio+10, fin):fin].astype(str).values.flatten())
@@ -587,8 +611,6 @@ def procesar_resultado(ruta, conn):
                         tiene_asterisco = True
                         nombre_raw = nombre_raw.replace('(*)', '').replace('*', '').strip()
                 if not es_nombre_valido(nombre_raw): continue
-                
-                # --- V92: CAPTURAR CUERPOS ---
                 cuerpos, cuerpos_acum = None, None
                 vals_fila = [str(x).strip() for x in row if str(x).strip() and str(x).upper() != 'NAN']
                 if len(vals_fila) > 3:
@@ -597,7 +619,6 @@ def procesar_resultado(ruta, conn):
                     if re.search(r'\d', cand_acum) and len(cand_acum) < 10: cuerpos_acum = cand_acum
                     if re.search(r'\d', cand_int) and len(cand_int) < 10: cuerpos = cand_int
                     elif "PZO" in cand_int or "CZA" in cand_int or "HCO" in cand_int: cuerpos = cand_int
-
                 jockey = None
                 for k in range(col_caballo + 1, min(col_caballo + 4, len(row))):
                     val = str(row.iloc[k]).strip()
@@ -611,9 +632,7 @@ def procesar_resultado(ruta, conn):
                     'cuerpos_acum': cuerpos_acum
                 })
             
-            competidores_finales = recalcular_posiciones_v90(competidores, txt_footer)
-            
-            # --- V92: CALCULO AUTOMATICO ---
+            competidores_finales = recalcular_posiciones_v94(competidores, txt_footer)
             acumulado_real = 0.0
             for comp in competidores_finales:
                 valor_cuerpos = parsear_cuerpos_a_float(comp.get('cuerpos', ''))
@@ -624,7 +643,6 @@ def procesar_resultado(ruta, conn):
                 else:
                     if comp.get('cuerpos_acum'): val_acum_db = comp['cuerpos_acum']
                     else: val_acum_db = formatear_float_a_cuerpos(acumulado_real)
-
                 idc = get_or_create_caballo(conn, comp['nombre'])
                 if idc:
                     cur = conn.cursor()
@@ -646,8 +664,7 @@ def procesar_resultado(ruta, conn):
                         """, (idc, fecha_str, nro_carrera, comp['puesto_raw'], puesto_fin, 
                               comp['jockey'], premio_real, distancia_real, estado_pista_real, tiempo_real, obs_val, comp.get('cuerpos'), val_acum_db))
                     conn.commit()
-        
-        verificar_y_borrar_no_corrieron_v90(conn, txt_footer, fecha_str, nro_carrera)
+        verificar_y_borrar_no_corrieron_v94(conn, txt_footer, fecha_str, nro_carrera)
 
 if __name__ == "__main__":
     crear_base_de_datos()
@@ -655,4 +672,4 @@ if __name__ == "__main__":
     for p in progs: procesar_programa(p, sqlite3.connect(DATABASE_FILE))
     res = sorted([os.path.join(CARPETA_RESULTADOS, f) for f in os.listdir(CARPETA_RESULTADOS) if f.endswith(('xlsx', 'xls')) and not f.startswith('~$')])
     for r in res: procesar_resultado(r, sqlite3.connect(DATABASE_FILE))
-    print("--- FIN V92 (CÁLCULO AUTOMÁTICO DE CUERPOS) ---")
+    print("--- FIN V94 (BORRADO NUCLEAR POR FECHA + FORMATO CUERPOS) ---")
