@@ -6,12 +6,6 @@
     background-color: white;
 }
 
-@media screen and (min-width: 768px) {
-    .main-inicio {
-        margin-top: 40px; /* Antes estaba en .main-pages, ahora en .main-inicio */
-    }
-}
-
 /* WHATSAPP ICON */
 .whatsapp-icon {
     background-color: #0df053;
